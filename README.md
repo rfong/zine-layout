@@ -1,6 +1,8 @@
-This script generates zine print layouts that are meant to be folded from letter/A4 paper. I wrote it to streamline the A7 size [zines](https://distractibility.github.io) I sometimes make at home.
+This script generates zine print layouts that are meant to be folded from A4 paper. I wrote it to streamline the A7 size [zines](https://distractibility.github.io) I sometimes make at home.
 
 Specifically, it expects an input PDF formatted as a page size you would get by folding a sheet N times (e.g. folding an A4 sheet into A5, A6, A7 size).
+
+If you need letter size paper instead: the Python script theoretically supports it, but I didn't enable that option in the bash entry point because I don't have letter size paper at home.
 
 # Environment
 Requires Python 3.
