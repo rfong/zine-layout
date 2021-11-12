@@ -19,8 +19,9 @@ source venv/bin/activate
 
 Expected input: A PDF of your pages in sequential order, formatted as a page size you would get by folding a sheet N times (e.g. folding an A4 sheet into A5, A6, A7 size).
 
-Name should be formatted to reflect page size: `*-A7.pdf`, `*-A6.pdf`, etc.
+Name should be formatted to reflect page size: `*-A7.pdf`, `*-A6.pdf`, etc. The script may also have trouble if your input PDF is located outside this directory, so I recommend copying it in.
 - [ ] TODO: make it so the name can be anything
+- [ ] TODO: handle input file placement more cleanly
 
 ## Entry point
 ```
