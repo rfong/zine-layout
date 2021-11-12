@@ -1,4 +1,4 @@
-This script generates zine print layouts that are meant to be folded from A4 paper. I wrote it to streamline the A7 size [zines](https://distractibility.github.io) I sometimes make at home.
+This script generates zine print layouts that are meant to be folded from double-sided A4 paper. I wrote it to streamline the A7 size [zines](https://distractibility.github.io) I sometimes make at home.
 
 # Environment
 Requires Python 3.
@@ -17,11 +17,17 @@ source venv/bin/activate
 
 # Usage
 
+## Prep
 Expected input: A PDF of your pages in sequential order, formatted as a page size you would get by folding a sheet N times (e.g. folding an A4 sheet into A5, A6, A7 size).
 
 Name should be formatted to reflect page size: `*-A7.pdf`, `*-A6.pdf`, etc. The script may also have trouble if your input PDF is located outside this directory, so I recommend copying it in.
 - [ ] TODO: make it so the name can be anything
 - [ ] TODO: handle input file placement more cleanly
+
+### Physical considerations
+Note that you will need a paper cutter if you are doing more than one fold.
+
+Note that it is still up to you to figure out how to split up your page signatures if your PDF is not 2^N pages long. For example, if your PDF is 24 pages long, you may be better off doing 3x 8-page signatures than trying to make a one-signature layout. You could also cheat by inserting blank pages in the middle of the input PDF to pad it to 32 pages before layout, and removing those slices after printing and cutting.
 
 ## Entry point
 ```
