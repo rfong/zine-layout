@@ -1,9 +1,5 @@
 This script generates zine print layouts that are meant to be folded from A4 paper. I wrote it to streamline the A7 size [zines](https://distractibility.github.io) I sometimes make at home.
 
-Specifically, it expects an input PDF formatted as a page size you would get by folding a sheet N times (e.g. folding an A4 sheet into A5, A6, A7 size).
-
-If you need letter size paper instead: the Python script theoretically supports it, but I didn't enable that option in the bash entry point because I don't have letter size paper at home.
-
 # Environment
 Requires Python 3.
 
@@ -20,6 +16,11 @@ source venv/bin/activate
 ```
 
 # Usage
+
+Expected input: A PDF of your pages in sequential order, formatted as a page size you would get by folding a sheet N times (e.g. folding an A4 sheet into A5, A6, A7 size).
+
+Name should be formatted to reflect page size: `*-A7.pdf`, `*-A6.pdf`, etc.
+- [ ] TODO: make it so the name can be anything
 
 ## Entry point
 ```
@@ -46,8 +47,10 @@ You can also add the `-l` flag for landscape mode. Otherwise, it will use portra
 ```
 -l   set if in landscape mode
 -t   test python file but don't compile TeX
--q   quiet output of TeX compilation (suppress verbose output)
+-q   quiet output (suppress verbose TeX compilation messages)
 ```
+
+If you need letter size paper instead of A4: the Python script theoretically supports it, but I didn't enable that option in the bash entry point because I don't have letter size paper at home.
 
 # How it works
 
