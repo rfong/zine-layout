@@ -19,7 +19,7 @@ from enum import Enum
 import math
 from optparse import OptionParser
 import os
-import pyPdf
+import PyPDF2
 
 
 MAX_FOLDS = 3
@@ -45,7 +45,7 @@ LETTER_FOLDS_TO_DIMENSIONS = {
 }
 
 def get_num_pdf_pages(fname):
-    reader = pyPdf.PdfFileReader(open(fname))
+    reader = PyPDF2.PdfFileReader(open(fname, 'rb'))
     return reader.getNumPages()
 
 def get_layout_tex(
@@ -73,21 +73,21 @@ def get_layout_tex(
             from_filename)
 
 # Parameterized TeX templates to assemble a PDF into the next paper size up
-A4_LAYOUT_TEMPLATE="""\documentclass[%s]{article}
-\usepackage[final]{pdfpages}
-\usepackage[margin=0in,heightrounded]{geometry}
+A4_LAYOUT_TEMPLATE='''\documentclass[%s]{article}
+\\usepackage[final]{pdfpages}
+\\usepackage[margin=0in,heightrounded]{geometry}
 \\begin{document}
-\includepdf[pages=-,nup=1x2,%ssignature=%d]{%s}
-\end{document}
-"""
+\\includepdf[pages=-,nup=1x2,%ssignature=%d]{%s}
+\\end{document}
+'''
 
-LETTER_LAYOUT_TEMPLATE="""\documentclass[landscape]{article}
-\usepackage[final]{pdfpages}
-\usepackage[paperwidth=%s,paperheight=%s,margin=0in,heightrounded]{geometry}
+LETTER_LAYOUT_TEMPLATE='''\documentclass[landscape]{article}
+\\usepackage[final]{pdfpages}
+\\usepackage[paperwidth=%s,paperheight=%s,margin=0in,heightrounded]{geometry}
 \\begin{document}
-\includepdf[pages=-,nup=1x2,%ssignature=%d]{%s}
-\end{document}
-"""
+\\includepdf[pages=-,nup=1x2,%ssignature=%d]{%s}
+\\end{document}
+'''
 
 def main():
     parser = OptionParser()
@@ -96,27 +96,31 @@ def main():
     parser.add_option("--landscape", dest="is_landscape",
                       default=False, action="store_true",
                       help="set if in landscape mode")
-    parser.add_option("--letter", dest="is_letter_format",
-                      default=False, action="store_true",
-                      help="set if using letter paper; default is A4")
+    parser.add_option("--a4", dest="is_letter_format",
+                      default=True, action="store_false",
+                      help="set if using A4 paper; default is letter")
     (options,args) = parser.parse_args()
 
     # Validation
     if not args:
-        print "Expected filename of input PDF"
+        print("Expected filename of input PDF")
         exit(0)
     if not os.path.exists(args[0]):
-        print "Path %s does not exist" % args[0]
+        print("Path %s does not exist" % args[0])
         exit(0)
     if options.num_folds not in range(1, MAX_FOLDS+1):
-        print "--folds should be an integer in the range [1,%d]" % MAX_FOLDS
+        print("--folds should be an integer in the range [1,%d]" % MAX_FOLDS)
         exit(0)
     options.paper_format = (
         PaperFormat.LETTER if options.is_letter_format else PaperFormat.A4)
 
-    # For page signature, round up to nearest upward power of 2
+    # For page signature, round up to nearest upward 2^(folds+1)
     num_pages = get_num_pdf_pages(args[0])
-    num_pages = int(math.pow(2, math.ceil(math.log(num_pages, 2))))
+    pages_per_sheet = math.pow(2, options.num_folds + 1)
+    print("pages_per_sheet:", pages_per_sheet)
+
+    # Subtract the negative modulus to pad up to a whole page signature
+    num_pages = num_pages - (num_pages % -pages_per_sheet)
 
     # Generate and write intermediate TeX files
     path_base, path_ext = os.path.splitext(args[0])
@@ -127,11 +131,17 @@ def main():
     while folds > 0:
         # Use most recent file as input to next larger paper size
         in_path = os.path.splitext(out_path)[0] + ".pdf"
-        out_path = (
-            path_base + "-" + ("letter" if options.is_letter_format else "") +
-            A4_FOLDS_TO_OUTPUT_FORMAT[folds] + TEX_EXT
-        )
+        if options.is_letter_format:
+            out_path = (
+                path_base + "-" + A4_FOLDS_TO_OUTPUT_FORMAT[folds][1:]
+                + TEX_EXT
+            )
+        else:
+            out_path = (
+                path_base + "-" + A4_FOLDS_TO_OUTPUT_FORMAT[folds] + TEX_EXT
+            )
         with open(out_path, "w") as f:
+            print("writing to:", out_path)
             f.write(
                 get_layout_tex(
                     folds, in_path, num_pages, format=options.paper_format,

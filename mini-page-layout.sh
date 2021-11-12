@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to make a printable A4 or letter PDF from a PDF with a smaller page 
+# Script to make a printable A4 PDF from a PDF with a smaller page 
 # size which is meant to be folded from a double-sided sheet.
 # Example usage:
 # 	`./mini-page-layout.sh zine-A7.pdf 3`
@@ -38,24 +38,24 @@ done
 shift "$((OPTIND-1))"  # Shift away opts
 #echo "args: $@"
 
-# Copy source file here
-cp $1 $OUTPUT_DIR
-
 # Get file basename
-base_fname=$OUTPUT_DIR/${1%.*}
-
-# Remove old intermediate TeX files
-exts=("tex" "aux" "log")
-for ext in ${exts[@]}; do
-	[ -e "${base_fname}-a*.$ext" ] && trash "${base_fname}-a*.$ext"
-done
+base_fname=${1%.*}
+echo $base_fname
 
 # Generate new TeX files
 if [ -z $landscape ]; then
-	python mini-page-layout.py $1 --folds=$2
+	python mini-page-layout.py $base_fname.pdf --folds=$2
 else
-	python mini-page-layout.py $1 --folds=$2 --landscape
+	python mini-page-layout.py $base_fname.pdf --folds=$2 --landscape
 fi
+
+# Remove old files
+[ -e "$OUTPUT_DIR/${base_fname}-*" ] && trash "$OUTPUT_DIR/${base_fname}-*"
+
+# Move TeX files to output dir
+mv $base_fname-*.tex $OUTPUT_DIR
+# Copy source file to output dir
+cp $1 $OUTPUT_DIR
 
 if [ "$nocompile" ]; then
 	echo "Skip compilation"
@@ -63,6 +63,7 @@ if [ "$nocompile" ]; then
 fi
 
 # Compile TeX
+cd $OUTPUT_DIR
 for f in `ls ${base_fname}-*.tex | sort -r`; do
 	if [ "$quiet" ]; then
 		pdflatex $f >/dev/null
@@ -70,6 +71,14 @@ for f in `ls ${base_fname}-*.tex | sort -r`; do
 		pdflatex $f
 	fi
 done
+cd ..
 
-print "Wrote output to ${base_fname}-a4.pdf"
-open ${base_fname}-a4.pdf
+mv *.tex $OUTPUT_DIR >/dev/null
+mv $base_fname-*.pdf $OUTPUT_DIR >/dev/null
+[ -e "*.aux" ] && trash "*.aux"
+[ -e "*.log" ] && trash "*.log"
+
+cp $OUTPUT_DIR/${base_fname}-*4.pdf ${base_fname}-print.pdf
+echo "Wrote output to ${base_fname}-print.pdf"
+open ${base_fname}-print.pdf
+open $OUTPUT_DIR/${base_fname}-a4.pdf
